@@ -21,9 +21,13 @@ import cat.institutmarianao.shipments.model.User;
 
 @Component
 @PropertySource("classpath:messages.properties")
+@PropertySource("classpath:application.properties")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
-	private static final String HOST = "https://localhost";// TODO config
-	private static final String PORT = "8443";// TODO config
+	@Value("${webService.host}")
+	private String webServiceHost;
+
+	@Value("${webService.port}")
+	private String webServicePort;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -33,7 +37,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		final String uri = HOST + ":" + PORT + "/users/authenticate";
+		final String uri = webServiceHost + ":" + webServicePort + "/users/authenticate";
 
 		String username = authentication.getName();
 		String password = authentication.getCredentials().toString();

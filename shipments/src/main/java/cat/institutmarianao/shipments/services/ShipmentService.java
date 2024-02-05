@@ -9,7 +9,7 @@ import cat.institutmarianao.shipments.model.forms.ShipmentsFilter;
 public interface ShipmentService {
 	List<Shipment> filterShipments(ShipmentsFilter filter);
 
-	Shipment add(Shipment ticket);
+	Shipment add(Shipment shipment);
 
 	Action tracking(Action action);
 }
