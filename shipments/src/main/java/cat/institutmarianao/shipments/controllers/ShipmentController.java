@@ -19,6 +19,7 @@ import cat.institutmarianao.shipments.model.Assignment;
 import cat.institutmarianao.shipments.model.Delivery;
 import cat.institutmarianao.shipments.model.Shipment;
 import cat.institutmarianao.shipments.model.Shipment.Status;
+import cat.institutmarianao.shipments.model.forms.UserForm;
 import cat.institutmarianao.shipments.model.User;
 import cat.institutmarianao.shipments.services.ShipmentService;
 import cat.institutmarianao.shipments.services.UserService;
@@ -33,6 +34,7 @@ public class ShipmentController {
 
 	@Autowired
 	private ShipmentService shipmentService;
+	
 
 	@ModelAttribute("user")
 	public User setupUser() {
@@ -42,11 +44,13 @@ public class ShipmentController {
 	}
 
 	@GetMapping("/new")
-	public ModelAndView newShipment(@ModelAttribute("user") User user) {
+	public ModelAndView newShipment(@ModelAttribute("shipment") Shipment shipment) {
 
-		// TODO - New shipment
+		//TODO
+		ModelAndView newShipmentView = new ModelAndView("shipment");
+		newShipmentView.getModelMap().addAttribute("edit", false);
 
-		return null;
+		return newShipmentView;
 	}
 
 	@PostMapping("/new")
