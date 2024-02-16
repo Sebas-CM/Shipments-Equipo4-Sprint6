@@ -1,6 +1,7 @@
 package cat.institutmarianao.shipments.controllers;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -63,11 +64,12 @@ public class ShipmentController {
 	public ModelAndView allShipmentsList(@ModelAttribute("user") User user,
 			@PathVariable("shipment-status") Status shipmentStatus) {
 
-		// TODO - Retrieve all shipments by status
-		//ShipmentsFilter a = new ShipmentsFilter();
-		//shipmentService.filterShipments(a);
-
-		return null;
+		ModelAndView modelAndView = new ModelAndView();
+		ShipmentsFilter shipmentsFilter = new ShipmentsFilter();
+		shipmentsFilter.setStatus(shipmentStatus);
+		List<Shipment> filteredShipments = shipmentService.filterShipments(shipmentsFilter);
+		modelAndView.addObject(filteredShipments);
+		return modelAndView;
 	}
 
 	@PostMapping("/assign")
@@ -79,9 +81,8 @@ public class ShipmentController {
 
 	@PostMapping("/deliver")
 	public String deliverShipment(@Validated Delivery delivery) {
-
-		// TODO - Save shipment delivery
-
-		return null;
+		delivery.setDate(new Date());
+		shipmentService.tracking(delivery);
+		return "redirect:/shipments/list/IN_PROCESS";
 	}
 }
