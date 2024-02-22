@@ -2,6 +2,7 @@ package cat.institutmarianao.shipments.services.impl;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -49,7 +50,11 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	@Override
 	public Action tracking(Action action) {
-		// TODO Auto-generated method stub
-		return null;
+		final String uri = webServiceHost + ":" + webServicePort + "/shipments/save";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		HttpEntity<Action> request = new HttpEntity<>(action, headers);
+		return restTemplate.postForObject(uri, request, Action.class);
 	}
 }
