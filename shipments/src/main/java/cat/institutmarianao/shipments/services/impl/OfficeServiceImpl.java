@@ -1,13 +1,17 @@
 package cat.institutmarianao.shipments.services.impl;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.web.util.UriComponentsBuilder;
 import cat.institutmarianao.shipments.model.Office;
 import cat.institutmarianao.shipments.services.OfficeService;
 
@@ -26,13 +30,22 @@ public class OfficeServiceImpl implements OfficeService {
 
 	@Override
 	public Office getById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		final String baseUri = webServiceHost + ":" + webServicePort + "/office/get/by/id/{id}";
+
+		UriComponentsBuilder uriTemplate = UriComponentsBuilder.fromHttpUrl(baseUri);
+
+		Map<String, Long> uriVariables = new HashMap<>();
+		uriVariables.put("id", id);
+
+		Office response = restTemplate.getForObject(uriTemplate.buildAndExpand(uriVariables).toUriString(), Office.class);
+		return response;
 	}
 
 	@Override
 	public List<Office> getAllOffices() {
-		// TODO Auto-generated method stub
-		return null;
+		final String uri = webServiceHost + ":" + webServicePort + "/office/find/all";
+
+		ResponseEntity<Office[]> response = restTemplate.getForEntity(uri, Office[].class);
+		return Arrays.asList(response.getBody());
 	}
 }
