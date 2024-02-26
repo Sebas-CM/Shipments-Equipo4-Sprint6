@@ -14,11 +14,19 @@
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
-<link rel="stylesheet" th:href="@{/css/main.css}"
-	href="../static/css/main.css" />
+<link rel="stylesheet" th:href="@{/css/main.css}" href="../static/css/main.css" />
 <title>Shipments</title>
 </head>
 <body>
+	<div th:replace="~{fragments/dialogs :: remove_user_dialog}"></div>
+
+	<div th:if="${param.removeerror != null}"
+		class="alert alert-danger alert-dismissible" role="alert">
+		<span th:text="#{users.remove.error(${param.removeerror})}"></span>
+		<button type="button" class="btn-close" data-bs-dismiss="alert"
+			aria-label="Close"></button>
+	</div>
+	
 	<section class="container">
 		<header class="jumbotron" th:replace="~{fragments/template :: header}">
 			Shipments Header </header>
@@ -29,7 +37,88 @@
 		<section class="card my-1"
 			th:replace="~{fragments/template :: heading}">Heading</section>
 
-		TODO - shipments view
+		<table
+			class="table table-striped table-bordered table-condensed table-responsive">
+			<thead>
+				<tr>
+					<th th:text="#{shipments.table.head.id}" class="text-center">ID</th>
+					<th th:text="#{shipments.table.head.tracking.num}" class="text-center">Tracking Number</th>
+					<th th:text="#{shipments.table.head.reception}" class="text-center">Reception</th>
+					<th th:text="#{shipments.table.head.receptionist}" class="text-center">Receptionist</th>
+					<th th:text="#{shipments.table.head.priority}"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}" class="text-center">Priority</th>
+					<th th:text="#{shipments.table.head.courier}"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}" class="text-center">Courier</th>
+					<th th:text="#{shipments.table.head.category}" class="text-center">Category</th>
+					<th th:text="#{shipments.table.head.note}" class="text-center">Note</th>
+					<th sec:authorize="hasAnyRole('LOGISTICS_MANAGER', 'RECEPTIONIST')"
+						th:text="#{shipments.table.head.assign}"
+						th:if="${#strings.equals(shipmentStatus, 'PENDING')}" class="text-center">Assign</th>
+					<th sec:authorize="hasRole('COURIER')"
+						th:text="#{shipments.table.head.deliver}"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}" class="text-center">Deliver</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="shipment, iStat  : ${shipments}">
+					<td th:text="${shipment.id}">1</td>
+					<td th:text="${shipment.trackingNumber}">12345</td>
+					<td th:text="${shipment.receptionDate}">01/02/2024 12:00:00</td>
+					<td th:text="${shipment.receptionist}">lola</td>
+					<th th:text="${shipment.priority}"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}">2</th>
+					<th th:text="${shipment.courier}"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}">genis</th>
+					<td th:text="${shipment.category}">GOVERNMENT</td>
+					<td th:text="${shipment.note}">Medical Equipment</td>
+					<td sec:authorize="hasAnyRole('LOGISTICS_MANAGER', 'RECEPTIONIST')"
+						th:if="${#strings.equals(shipmentStatus, 'PENDING')}"
+						class="text-center">
+						<button sec:authorize="hasAnyRole('LOGISTICS_MANAGER', 'RECEPTIONIST')" type="button"
+							class="btn btn-warning btn-sm" data-bs-toggle="modal"
+							data-bs-target="#assignShipmentDialog"
+							th:data-bs-shipmentId="${shipment.id}">
+							<i class="bi bi-person-bounding-box"></i>
+						</button></td>
+					<td sec:authorize="hasRole('COURIER')"
+						th:if="${#strings.equals(shipmentStatus, 'IN_PROCESS')}"
+						class="text-center">
+						<button sec:authorize="hasRole('COURIER')" type="button"
+							class="btn btn-success btn-sm" data-bs-toggle="modal"
+							data-bs-target="#deliverShipmentDialog"
+							th:data-bs-shipmentId="${shipment.id}"
+							th:data-bs-trackingNum="${shipment.trackingNumber}">
+							<i class="bi bi-truck-front-fill"></i>
+						</button></td></td>
+				</tr>
+				<tr th:remove="all">
+					<td>2</td>
+					<td>Courier</td>
+					<td>genis</td>
+					<td>Genís Esteve i Prats</td>
+					<td>1515</td>
+					<td>External, Correos</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-danger btn-sm">
+							<i class="bi bi-person-dash"></i>
+						</button>
+					</td>
+				</tr>
+				<tr th:remove="all">
+					<td>3</td>
+					<td>Logistics Manager</td>
+					<td>laia</td>
+					<td>Laia Vives i Marsans</td>
+					<td>1501</td>
+					<td>Mestre Candi (L01)</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-danger btn-sm">
+							<i class="bi bi-person-dash"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</section>
 </body>
 </html>

@@ -22,9 +22,8 @@ import cat.institutmarianao.shipments.model.Assignment;
 import cat.institutmarianao.shipments.model.Delivery;
 import cat.institutmarianao.shipments.model.Shipment;
 import cat.institutmarianao.shipments.model.Shipment.Status;
-import cat.institutmarianao.shipments.model.forms.ShipmentsFilter;
-import cat.institutmarianao.shipments.model.forms.UserForm;
 import cat.institutmarianao.shipments.model.User;
+import cat.institutmarianao.shipments.model.forms.ShipmentsFilter;
 import cat.institutmarianao.shipments.services.ShipmentService;
 import cat.institutmarianao.shipments.services.UserService;
 
@@ -38,7 +37,6 @@ public class ShipmentController {
 
 	@Autowired
 	private ShipmentService shipmentService;
-	
 
 	@ModelAttribute("user")
 	public User setupUser() {
@@ -48,28 +46,41 @@ public class ShipmentController {
 	}
 
 	@GetMapping("/new")
-	public ModelAndView newShipment(@ModelAttribute("shipment") Shipment shipment) {
-
+	public ModelAndView newShipment() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		ModelAndView newShipmentView = new ModelAndView("shipment");
+		Shipment shipment = new Shipment();
+		String username = authentication.getName();
+		shipment.setReceptionist(username);
+		newShipmentView.getModelMap().addAttribute("shipmentForm", shipment);
 		return newShipmentView;
 	}
 
 	@PostMapping("/new")
 	public String submitNewShipment(@Validated Shipment shipment, BindingResult result, ModelMap modelMap) {
-		
-		return "redirect:/shipments/list/";
+		if (result.hasErrors()) {
+			return "shipment";
+		}
+		shipmentService.add(shipment);
+		return "redirect:/shipments/list/PENDING";
 	}
 
 	@GetMapping("/list/{shipment-status}")
 	public ModelAndView allShipmentsList(@ModelAttribute("user") User user,
 			@PathVariable("shipment-status") Status shipmentStatus) {
-
-		ModelAndView modelAndView = new ModelAndView();
+		ModelAndView shipmentView = new ModelAndView("shipments");
 		ShipmentsFilter shipmentsFilter = new ShipmentsFilter();
 		shipmentsFilter.setStatus(shipmentStatus);
+		if (user.getRole().toString().equals(User.COURIER)) {
+			shipmentsFilter.setCourierAssigned(user.getUsername());
+		}
+		if (user.getRole().toString().equals(User.RECEPTIONIST)) {
+			shipmentsFilter.setReceptionist(user.getUsername());
+		}
 		List<Shipment> filteredShipments = shipmentService.filterShipments(shipmentsFilter);
-		modelAndView.addObject(filteredShipments);
-		return modelAndView;
+		shipmentView.getModelMap().addAttribute("shipments", filteredShipments);
+		shipmentView.getModelMap().addAttribute("shipmentStatus", shipmentStatus);
+		return shipmentView;
 	}
 
 	@PostMapping("/assign")

@@ -1,7 +1,7 @@
 package cat.institutmarianao.shipments.services.impl;
 
+import java.util.Arrays;
 import java.util.List;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +9,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import cat.institutmarianao.shipments.model.Action;
 import cat.institutmarianao.shipments.model.Shipment;
@@ -32,8 +34,22 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	@Override
 	public List<Shipment> filterShipments(ShipmentsFilter filter) {
-		// TODO Auto-generated method stub
-		return null;
+		final String baseUri = webServiceHost + ":" + webServicePort + "/shipments/find/all";
+
+		UriComponentsBuilder uriTemplate = UriComponentsBuilder.fromHttpUrl(baseUri);
+
+		uriTemplate.queryParam("status", filter.getStatus());
+		uriTemplate.queryParam("category", filter.getCategory());
+
+		if (filter.getCourierAssigned() != null) {
+			uriTemplate.queryParam("courierAssigned", filter.getCourierAssigned());
+		}
+		if (filter.getReceptionist() != null) {
+			uriTemplate.queryParam("receptionist", filter.getReceptionist());
+		}
+		ResponseEntity<Shipment[]> response = restTemplate.getForEntity(uriTemplate.encode().toUriString(),
+				Shipment[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	@Override
@@ -50,10 +66,10 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	@Override
 	public Action tracking(Action action) {
-		final String uri = webServiceHost + ":" + webServicePort + "/shipments/save";
+		final String uri = webServiceHost + ":" + webServicePort + "/shipments/save/action";
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		HttpEntity<Action> request = new HttpEntity<>(action, headers);
 		return restTemplate.postForObject(uri, request, Action.class);
 	}
